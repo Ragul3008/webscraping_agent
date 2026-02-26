@@ -1,162 +1,105 @@
-# AI Dataset Scraper Agent (Groq + LLaMA-3.3-70B)
+# 🔍 Multi-Engine Image & Dataset Collector
 
-This project is an intelligent AI agent that automatically finds, selects, validates, and saves dataset links from the internet using LLaMA-3.3-70B via Groq.
+A Python-based multi-engine data collection system that:
 
-It can automatically:
-
-• Generate smart dataset search queries  
-• Search internet using DuckDuckGo (DDGS)  
-• Select best dataset links using LLM reasoning  
-• Scrape dataset information asynchronously  
-• Validate datasets using LLM  
-• Save results into JSON and CSV  
+- Downloads images locally using multiple search engines
+- Finds dataset source links from major dataset platforms
+- Uses fallback mechanisms for stability
+- Saves everything in structured folders
 
 ---
 
-# How It Works
+## 🚀 Features
 
-User input
-↓  
-LLaMA Agent (Groq)
-↓  
-Search Tool (DDGS)
-↓  
-Select Best URLs (LLM)
-↓  
-Scraper Tool (Async)
-↓  
-Validate datasets (LLM)
-↓  
-Save to JSON and CSV
+### 🖼 Multi-Engine Image Downloader
+- Bing Image Crawler (Primary)
+- Google Image Crawler (Secondary)
+- DuckDuckGo Image Fallback
+- Automatic failure handling
+- Local storage saving
+
+### 📦 Dataset Link Finder
+Searches and collects dataset links from:
+
+- Kaggle
+- HuggingFace
+- GitHub
+- Roboflow
+- Zenodo
+- Mendeley Data
+- IEEE DataPort
+- UCI Repository
+- Figshare
+
+All dataset links are saved into a text file.
 
 ---
-
-# Project Structure
-webscrapping/
-│
-├── agent/
-│ ├── llm_agent.py
-│ ├── groq_llm.py
-│ ├── planner.py
-│ └── state.py
-│
-├── tools/
-│ ├── search_tool.py
-│ └── scraper_tool.py
-│
-├── storage/
-│ ├── json_writer.py
-│ └── csv_writer.py
-│
-├── core/
-│ ├── logger.py
-│ └── config.py
-│
-├── output/
-│ ├── datasets.json
-│ └── datasets.csv
-│
-├── main.py
-├── requirements.txt
-└── README.md
 
 
 ---
 
-# Requirements
+## 📦 Installation
 
-Python 3.10 or newer
-
-Install dependencies:
+Create virtual environment (optional but recommended):
 
 ```bash
-pip install -r requirements.txt
+python -m venv venv
+venv\Scripts\activate
 
-Setup Groq API Key
-Step 1: Go here
-https://console.groq.com/keys
+pip install icrawler
+pip install ddgs
+pip install requests
 
-Step 2: Create API key
+▶ Usage
 
-Step 3: Set environment variable
+Run the program:
 
-PowerShell:
-setx GROQ_API_KEY "your_api_key_here"
-Run the Project
 python main.py
 
-Example:
+⚙ How It Works
 
-Enter dataset request: banana tree stem disease
-Output Files
+Splits image downloading across multiple engines.
 
-Saved in:
+If one engine fails, the system continues.
 
-output/datasets.json
-output/datasets.csv
+Searches dataset-related queries.
 
-Example JSON:
+Filters results by known dataset platforms.
 
-[
-  {
-    "title": "Banana Disease Dataset",
-    "url": "https://www.kaggle.com/datasets/...",
-    "description": "Banana disease classification images"
-  }
-]
-Features
+Saves valid dataset URLs.
 
-• Uses LLaMA-3.3-70B (Groq cloud)
-• Very fast inference
-• Async scraping
-• Intelligent dataset selection
-• Automatic validation
-• JSON and CSV export
-• Modular architecture
-• Production ready
+⚠ Limitations
 
-Supported Dataset Sources
+*Search engines may block scraping occasionally.
 
-• Kaggle
-• HuggingFace
-• GitHub
-• Mendeley
-• ResearchGate
-• Public dataset portals
+*Some image URLs may return 403 errors.
 
-Troubleshooting
+*Not all dataset links are guaranteed to be valid downloads.
 
-If search returns 0 results:
+*Does not auto-download Kaggle or HuggingFace datasets (link-only collection).
 
-Install latest search library:
+🔥 Future Improvements
 
-pip install ddgs --upgrade
+*Kaggle API integration
 
-If Groq error:
+*HuggingFace dataset auto-download
 
-Check API key:
+*Async parallel downloads
 
-echo $env:GROQ_API_KEY
-Expected Speed
+*Proxy rotation
 
-Typical runtime:
+*Dataset metadata extraction
 
-5 to 15 seconds per query
+*Duplicate image removal
 
-Example Query Ideas
+*LLM-based relevance scoring
 
-banana disease dataset
-plant disease dataset
-tomato leaf disease dataset
-brain tumor dataset
-crop disease dataset
+🛠 Built With
 
-Tech Stack
+*Python 3.11+
 
-Python
-Groq API
-LLaMA-3.3-70B
-AsyncIO
-DDGS search
-BeautifulSoup
-Pydantic
+*icrawler
+
+*ddgs
+
+*requests

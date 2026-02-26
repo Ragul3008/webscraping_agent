@@ -1,35 +1,39 @@
-from core.logger import get_logger
+from core.logger import setup_logger
 
-logger = get_logger("Planner")
+logger = setup_logger("Planner")
 
 
 class Planner:
-    """
-    Controls autonomous execution flow of the agent.
-    """
 
     def next_step(self, state):
 
+        # Step 1: Generate queries
         if not state.queries_generated:
-
             return "generate_queries"
 
-        elif not state.search_done:
-
+        # Step 2: Search
+        if not state.search_done:
             return "search"
 
-        elif not state.urls_selected:
+        # Step 3: Select URLs
+        if not state.urls_selected:
+
+            # if no search results, stop safely
+            if not state.search_results:
+                logger.warning("No search results found. Completing task.")
+                return "complete"
 
             return "select_urls"
 
-        elif not state.scrape_done:
+        # Step 4: Scrape
+        if not state.scrape_done:
+
+            # if no URLs found, stop safely
+            if not state.selected_urls:
+                logger.warning("No URLs found. Completing task.")
+                return "complete"
 
             return "scrape"
 
-        elif not state.validation_done:
-
-            return "validate"
-
-        else:
-
-            return "complete"
+        # Step 5: Complete
+        return "complete"

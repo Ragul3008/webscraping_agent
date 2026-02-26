@@ -6,124 +6,106 @@ from core.logger import setup_logger
 from agent.groq_llm import GroqLLM
 
 
-# Load environment variables from .env
 load_dotenv()
 
 logger = setup_logger("LLMAgent")
 
 
 class LLMAgent:
-    """
-    Autonomous LLM Agent powered by Groq LLaMA-3.3-70B.
-
-    Responsibilities:
-    - Generate optimized search queries
-    - Select best dataset URLs
-    - Validate scraped datasets
-    """
 
     def __init__(self):
 
         api_key = os.getenv("GROQ_API_KEY")
 
         if not api_key:
-            raise ValueError(
-                "GROQ_API_KEY not found. Please set it in .env file"
-            )
+            raise ValueError("GROQ_API_KEY missing")
 
         logger.info("Initializing LLaMA 3.3 70B Agent (Groq)")
 
         self.llm = GroqLLM(api_key=api_key)
 
-    # --------------------------------------------------
-    # Generate search queries
-    # --------------------------------------------------
 
     def generate_search_queries(self, user_query: str) -> List[str]:
 
-        logger.info("Generating optimized search queries")
+        logger.info("Generating massive dataset search queries")
 
         prompt = f"""
-You are an expert dataset discovery agent.
+You are a dataset discovery agent.
 
-Generate 5 highly relevant search queries to find datasets for:
+Generate 100 dataset search queries for:
 
 {user_query}
 
-Focus on:
-- Kaggle
-- HuggingFace
-- GitHub
-- Research datasets
-- Open datasets
+STRICT RULES:
 
-Return ONLY the queries, one per line.
-Do NOT include numbering or explanations.
+ONLY dataset queries
+Include:
+
+Kaggle
+HuggingFace
+GitHub
+research datasets
+image datasets
+video datasets
+zip datasets
+
+Return ONLY queries.
+One per line.
+No numbering.
+No explanation.
 """
 
         response = self.llm.chat(prompt)
 
-        queries = [
-            line.strip()
-            for line in response.split("\n")
-            if line.strip()
-        ]
+        queries = []
+
+        for line in response.split("\n"):
+
+            line = line.strip()
+
+            if len(line) > 10:
+                queries.append(line)
+
+        if len(queries) < 10:
+
+            queries.extend([
+                f"{user_query} dataset kaggle",
+                f"{user_query} dataset github",
+                f"{user_query} dataset huggingface",
+                f"{user_query} dataset images download",
+                f"{user_query} dataset videos download",
+            ])
 
         logger.info(f"Generated {len(queries)} queries")
 
-        return queries[:5]
+        return queries[:500]
 
-    # --------------------------------------------------
-    # Select best URLs
-    # --------------------------------------------------
 
-    def select_best_urls(
-        self,
-        search_results: List[Dict]
-    ) -> List[str]:
+    def select_best_urls(self, results: List[Dict]) -> List[str]:
 
         logger.info("Selecting best dataset URLs")
 
-        if not search_results:
-            return []
+        urls = []
 
-        formatted = "\n".join([
-            f"{r.get('title','')} - {r.get('href','')}"
-            for r in search_results
-        ])
+        for r in results:
 
-        prompt = f"""
-You are an intelligent dataset selection agent.
+            url = r.get("href")
 
-Select the 5 BEST dataset URLs from this list:
+            if not url:
+                continue
 
-{formatted}
+            if any(domain in url.lower() for domain in [
+                "kaggle",
+                "huggingface",
+                "github",
+                "dataset",
+                "data"
+            ]):
 
-Focus on:
-- Kaggle
-- HuggingFace
-- GitHub
-- Research datasets
-- Direct dataset downloads
+                urls.append(url)
 
-Return ONLY URLs, one per line.
-"""
+        return list(set(urls))[:50]
 
-        response = self.llm.chat(prompt)
-
-        urls = [
-            line.strip()
-            for line in response.split("\n")
-            if line.startswith("http")
-        ]
-
-        logger.info(f"Selected {len(urls)} URLs")
-
-        return urls[:5]
-
-    # --------------------------------------------------
-    # Validate dataset relevance
-    # --------------------------------------------------
 
     def validate_dataset(self, dataset: Dict) -> bool:
 
@@ -139,10 +121,9 @@ Return ONLY URLs, one per line.
             "dataset",
             "data",
             "download",
-            "kaggle",
-            "huggingface",
-            "github",
-            "research"
+            "image",
+            "video",
+            "zip"
         ]
 
         return any(k in text for k in keywords)

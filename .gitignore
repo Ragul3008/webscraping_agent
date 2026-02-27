@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Environment variables (keep secret!)
+.env
+
+# Downloaded files (too large for git)
+downloads/
+
+# Logs and results
+logs/
+results/
+
+# Kaggle credentials
+.kaggle/
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+desktop.ini

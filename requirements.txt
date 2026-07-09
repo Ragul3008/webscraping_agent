@@ -7,7 +7,7 @@ beautifulsoup4==4.12.3
 lxml==5.3.0
 
 # Search engine (new version, replaces duckduckgo_search)
-ddgs==8.0.0
+duckduckgo-search
 
 # LLM (Groq + LLaMA)
 groq==0.11.0

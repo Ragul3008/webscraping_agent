@@ -1,177 +1,83 @@
 import os
-import time
-import random
-import requests
-from icrawler.builtin import BingImageCrawler, GoogleImageCrawler
-from ddgs import DDGS
+from icrawler.builtin import BingImageCrawler
 
 
 class Downloader:
 
-    def __init__(self, output_dir="output"):
+    def __init__(self):
 
-        self.output_dir = output_dir
+        self.output_dir = "output"
         self.image_dir = os.path.join(self.output_dir, "images")
 
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(self.image_dir, exist_ok=True)
 
-        print("Multi-Engine Downloader initialized")
+        print("Ultimate Dataset Collector initialized")
 
-    # ---------------------------------------------------
-    # MULTI ENGINE IMAGE DOWNLOADER
-    # ---------------------------------------------------
+    # -----------------------
+    # IMAGE DOWNLOAD
+    # -----------------------
 
-    def download_images(self, query, limit=300):
+    def download_images(self, topic):
 
-        print(f"\nDownloading {limit} images for: {query}")
-
-        per_engine = limit // 3
-
-        # 1️⃣ Bing
-        try:
-            print("Using Bing engine...")
-            crawler = BingImageCrawler(storage={"root_dir": self.image_dir})
-            crawler.crawl(keyword=query, max_num=per_engine)
-        except Exception as e:
-            print("Bing failed:", str(e))
-
-        # 2️⃣ Google
-        try:
-            print("Using Google engine...")
-            crawler = GoogleImageCrawler(storage={"root_dir": self.image_dir})
-            crawler.crawl(keyword=query, max_num=per_engine)
-        except Exception as e:
-            print("Google failed:", str(e))
-
-        # 3️⃣ DuckDuckGo fallback
-        try:
-            print("Using DuckDuckGo fallback...")
-            self.ddg_fallback(query, per_engine)
-        except Exception as e:
-            print("DDG fallback failed:", str(e))
-
-        print("Multi-engine image download complete")
-
-    # ---------------------------------------------------
-    # DUCKDUCKGO FALLBACK
-    # ---------------------------------------------------
-
-    def ddg_fallback(self, query, limit):
-
-        downloaded = 0
-
-        with DDGS() as ddgs:
-
-            results = ddgs.images(query=query, max_results=limit)
-
-            for r in results:
-
-                try:
-                    url = r.get("image")
-                    if not url:
-                        continue
-
-                    ext = url.split(".")[-1].split("?")[0]
-                    if ext.lower() not in ["jpg", "jpeg", "png", "webp"]:
-                        ext = "jpg"
-
-                    filename = os.path.join(
-                        self.image_dir,
-                        f"ddg_{downloaded}.{ext}"
-                    )
-
-                    response = requests.get(
-                        url,
-                        timeout=10,
-                        headers={"User-Agent": "Mozilla/5.0"}
-                    )
-
-                    if response.status_code == 200:
-                        with open(filename, "wb") as f:
-                            f.write(response.content)
-
-                        downloaded += 1
-
-                        time.sleep(random.uniform(0.3, 0.6))
-
-                        if downloaded >= limit:
-                            break
-
-                except:
-                    continue
-
-    # ---------------------------------------------------
-    # MULTI ENGINE DATASET LINK FINDER
-    # ---------------------------------------------------
-
-    def find_dataset_links(self, query):
-
-        print(f"\nFinding dataset links for: {query}")
-
-        links = set()
-
-        dataset_sites = [
-            "kaggle.com",
-            "huggingface.co",
-            "github.com",
-            "roboflow.com",
-            "zenodo.org",
-            "mendeley",
-            "ieee-dataport",
-            "figshare.com",
-            "archive.ics.uci.edu"
-        ]
-
-        search_variants = [
-            f"{query} dataset download",
-            f"{query} image dataset",
-            f"{query} video dataset",
-            f"{query} kaggle dataset",
-            f"{query} huggingface dataset",
-            f"{query} github dataset",
-        ]
+        print(f"\nDownloading 300 images for: {topic}")
 
         try:
-            with DDGS() as ddgs:
+            crawler = BingImageCrawler(
+                storage={"root_dir": self.image_dir}
+            )
 
-                for sq in search_variants:
+            crawler.crawl(
+                keyword=topic,
+                max_num=300
+            )
 
-                    try:
-                        results = ddgs.text(query=sq, max_results=100)
+            print("Images downloaded successfully.")
 
-                        for r in results:
+        except Exception:
+            print("Image download failed.")
 
-                            url = r.get("href")
-                            if not url:
-                                continue
+    # -----------------------
+    # DATASET LINK FILTER + CLASSIFY
+    # -----------------------
 
-                            if any(site in url.lower() for site in dataset_sites):
-                                links.add(url)
+    def save_dataset_links(self, links):
 
-                    except:
-                        continue
+        filtered = []
+        seen = set()
 
-        except Exception as e:
-            print("Dataset search failed:", str(e))
+        for url in links:
 
-        filepath = os.path.join(self.output_dir, "dataset_links.txt")
+            lower = url.lower()
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            for link in links:
+            if url in seen:
+                continue
+
+            if any(domain in lower for domain in [
+                "kaggle.com",
+                "huggingface.co",
+                "github.com",
+                "roboflow.com",
+                "zenodo.org",
+                "figshare.com",
+                "mendeley.com",
+                "ieee-dataport.org",
+                "archive.ics.uci.edu"
+            ]):
+
+                if any(word in lower for word in [
+                    "dataset",
+                    "data",
+                    "image",
+                    "video"
+                ]):
+                    filtered.append(url)
+                    seen.add(url)
+
+        file_path = os.path.join(self.output_dir, "dataset_links.txt")
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            for link in filtered:
                 f.write(link + "\n")
 
-        print(f"Saved {len(links)} dataset links")
-
-    # ---------------------------------------------------
-    # RUN ALL
-    # ---------------------------------------------------
-
-    def run_all(self, query):
-
-        self.download_images(query, limit=300)
-
-        self.find_dataset_links(query)
-
-        print("\nALL DOWNLOAD TASKS COMPLETE")
-        print("Check folder:", self.output_dir)
+        print(f"\nSaved {len(filtered)} unique dataset links.")

@@ -5,3 +5,6 @@ __pycache__/
 output/
 .cache/
 *.log
+storage/
+platform.db
+platform.log

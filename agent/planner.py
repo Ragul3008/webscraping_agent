@@ -1,39 +1,44 @@
-from core.logger import setup_logger
-
-logger = setup_logger("Planner")
+from agent.decision_engine import DecisionEngine
+from tools.search import SearchTool
+from tools.downloader import Downloader
+from tools.dataset_hub import DatasetHub
 
 
 class Planner:
 
-    def next_step(self, state):
+    def __init__(self):
 
-        # Step 1: Generate queries
-        if not state.queries_generated:
-            return "generate_queries"
+        self.engine = DecisionEngine()
+        self.search = SearchTool()
+        self.downloader = Downloader()
+        self.dataset_hub = DatasetHub()
 
-        # Step 2: Search
-        if not state.search_done:
-            return "search"
+    def execute(self, topic: str):
 
-        # Step 3: Select URLs
-        if not state.urls_selected:
+        print("\nGenerating intelligent queries...\n")
 
-            # if no search results, stop safely
-            if not state.search_results:
-                logger.warning("No search results found. Completing task.")
-                return "complete"
+        image_query, dataset_queries = self.engine.generate_queries(topic)
 
-            return "select_urls"
+        print(f"{len(dataset_queries)} optimized queries generated.\n")
 
-        # Step 4: Scrape
-        if not state.scrape_done:
+        # 1️⃣ Download image dataset
+        self.downloader.download_images(image_query)
 
-            # if no URLs found, stop safely
-            if not state.selected_urls:
-                logger.warning("No URLs found. Completing task.")
-                return "complete"
+        # 2️⃣ Collect dataset links
+        all_links = []
 
-            return "scrape"
+        for q in dataset_queries:
+            results = self.search.search(q)
+            all_links.extend(results)
 
-        # Step 5: Complete
-        return "complete"
+        print(f"\nCollected {len(all_links)} raw links.")
+
+        self.downloader.save_dataset_links(all_links)
+
+        # 3️⃣ Auto download from Kaggle
+        self.dataset_hub.download_kaggle(topic)
+
+        # 4️⃣ Auto HuggingFace pull
+        self.dataset_hub.download_huggingface(topic)
+
+        print("\n🔥 FULL WORKFLOW COMPLETE\n")

@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-gold-50: #fffdf0;
+  --color-gold-100: #fef7be;
+  --color-gold-200: #fdf18d;
+  --color-gold-300: #fbe64d;
+  --color-gold-400: #fad91a;
+  --color-gold-500: #d9b40f;
+  --color-gold-600: #b78f09;
+  --color-gold-700: #956d07;
+  --color-gold-800: #734f07;
+  --color-gold-900: #563a07;
+  --color-gold-950: #321f02;
+
+  --color-darkbg-950: #030303;
+  --color-darkbg-900: #0a0a0a;
+  --color-darkbg-800: #141414;
+  --color-darkbg-700: #1e1e1e;
+
+  --background-image-gold-gradient: linear-gradient(135deg, #fbe64d 0%, #d9b40f 50%, #956d07 100%);
+  --background-image-gold-glow: radial-gradient(circle, rgba(217, 180, 15, 0.15) 0%, transparent 70%);
+
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-gold-border: 0 0 15px rgba(217, 180, 15, 0.15);
+  --shadow-gold-glow-hover: 0 0 25px rgba(217, 180, 15, 0.3);
+}
+
+body {
+  @apply bg-darkbg-950 text-slate-100 font-sans antialiased selection:bg-gold-500/30 selection:text-gold-200 overflow-x-hidden;
+}
+
+
+/* Glassmorphism Card Utility */
+.glass-card {
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(217, 180, 15, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-hover:hover {
+  background: rgba(25, 25, 25, 0.7);
+  border-color: rgba(217, 180, 15, 0.25);
+  box-shadow: 0 12px 40px 0 rgba(217, 180, 15, 0.08), 0 0 15px rgba(217, 180, 15, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030303;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d9b40f;
+}
+
+/* Golden Gradients & Glows */
+.gold-text-glow {
+  background: linear-gradient(135deg, #fff 30%, #fbe64d 70%, #d9b40f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(217, 180, 15, 0.2));
+}
+
+.glow-btn {
+  @apply relative overflow-hidden transition-all duration-300;
+}
+
+.glow-btn::after {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300 bg-gold-gradient;
+  z-index: 1;
+}
+
+.glow-btn:hover::after {
+  @apply opacity-10;
+}
+
+/* Hide input outline rules */
+input, select, textarea {
+  @apply focus:outline-none focus:ring-1 focus:ring-gold-500/50;
+}
+
+/* Pinterest Masonry Grid adjustments */
+.masonry-grid {
+  display: flex;
+  width: auto;
+}
+
+.masonry-grid_column {
+  background-clip: padding-box;
+}

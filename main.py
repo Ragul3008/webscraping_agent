@@ -1,13 +1,15 @@
-from tools.downloader import Downloader
+from agent.planner import Planner
 
 
 def main():
 
-    query = input("Enter topic: ").strip()
+    print("\nLLM-Controlled Autonomous Dataset Finder\n")
 
-    downloader = Downloader(output_dir="output")
+    topic = input("Enter topic: ").strip()
 
-    downloader.run_all(query)
+    planner = Planner()
+
+    planner.execute(topic)
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install fastapi uvicorn sqlalchemy aiosqlite passlib bcrypt pyjwt celery redis python-multipart email-validator httpx beautifulsoup4 pytest
+          pip install fastapi uvicorn sqlalchemy aiosqlite passlib bcrypt pyjwt celery redis python-multipart email-validator httpx beautifulsoup4 pytest numpy opencv-python-headless Pillow imagehash faiss-cpu
 
       - name: Run Backend Tests
         run: |
